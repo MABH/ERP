@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BEerp.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,10 +16,38 @@ namespace BEerp.Controllers
     public class ERPController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-
+        private Employee dummyEmployee = new Employee
+        {
+            id = 0,
+            name = "__"
+        };
         public ERPController(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        /**************************/
+        /* Actions for the Login  */
+        /**************************/
+        [EnableCors("MyPolicy")]
+        [HttpGet("Login/{user}/{password}/")]
+        public ActionResult<Employee> GetLogin(string user, string password)
+        {
+            try
+            {
+                //var employee = _context.Employees.Find(user, password);
+                var employee = _context.Employees.Where(a => a.user == user && a.password == password).Single();
+                if (employee == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(employee);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         /*******************************/
